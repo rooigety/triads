@@ -1,0 +1,14 @@
+==============
+Triads
+==============
+
+
+Features
+--------
+
+* Fretboard with 3 notes finder.
+
+Requirements
+------------
+
+    streamlit
