@@ -5,6 +5,7 @@
 
 from typing import List, Tuple
 
+import numpy as np
 import plotly.express as px
 import streamlit as st
 
@@ -27,13 +28,14 @@ def main():
         open_chord, open_places = find_open_chord(triads)
         colors = {chord: 0}
         for note in open_chord:
-            if not note in colors:
+            if not note in colors and note != "x":
                 colors[note] = len(colors)
 
         color_setting = []
         for note in open_chord:
             rgb = [0, 0, 0]
-            rgb[colors[note]] = 255
+            if note in colors:
+                rgb[colors[note]] = 255
             rgb = f"rgb({rgb[0]},{rgb[1]},{rgb[2]})"
             color_setting.append(rgb)
 
@@ -41,6 +43,14 @@ def main():
             y=range(1, 7),
             x=open_places,
         )
+        start = max(0, min(open_places))
+        offset = 0
+        if start == 0:
+            offset = 1
+            fig.add_vline(x=0, line_width=5, line_color="gray")
+        for i in range(start + offset, max(open_places) + 1):
+            fig.add_vline(x=i, line_width=1, line_dash="dash", line_color="gray")
+
         fig.update_layout(
             xaxis={"categoryorder": "category ascending"},
             # xaxis_type="category",
@@ -48,11 +58,9 @@ def main():
             xaxis_tickvals=list(range(max(open_places) + 1)),
             xaxis_ticktext=list(range(max(open_places) + 1)),
             yaxis_title="String",
+            xaxis_range=[max(0, min(open_places)) - 0.5, max(open_places) + 1],
         )
         fig.update_traces(marker_size=20, marker_color=color_setting)
-
-        for i in range(max(open_places)):
-            fig.add_vline(x=i, line_width=1, line_dash="dash", line_color="gray")
 
         st.plotly_chart(fig)
 
@@ -108,5 +116,9 @@ def find_open_chord(triads: List[str]) -> Tuple[List[str]]:
 
     # places.reverse()
     # chord.reverse()
+
+    if places[0] == 0 and chord[0] != triads[0]:
+        chord[0] = "x"
+        places[0] = -1
 
     return chord, places
